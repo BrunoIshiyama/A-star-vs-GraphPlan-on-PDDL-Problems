@@ -3,4 +3,11 @@
   <groupId>br.usp.topicos-ia</groupId>
   <artifactId>A-star-vs-GraphPlan-on-PDDL-problems</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <dependencies>
+      <dependency>
+          <groupId>com.github.pellierd</groupId>
+          <artifactId>pddl4j</artifactId>
+          <version>3.8</version>
+    </dependency>
+  </dependencies>
 </project>
