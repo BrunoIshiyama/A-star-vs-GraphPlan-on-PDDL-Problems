@@ -1,13 +1,12 @@
 package parser;
 
-import fr.uga.pddl4j.encoding.CodedProblem;
-import fr.uga.pddl4j.parser.ErrorManager;
-import fr.uga.pddl4j.planners.ProblemFactory;
-import utils.Utils;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+
+import fr.uga.pddl4j.encoding.CodedProblem;
+import fr.uga.pddl4j.parser.ErrorManager;
+import fr.uga.pddl4j.planners.ProblemFactory;
 
 //the class of a PDDLParser for example
 public class Parser {
