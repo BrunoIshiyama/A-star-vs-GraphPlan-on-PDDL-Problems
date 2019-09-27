@@ -1,15 +1,16 @@
+;; PDDL Problem File
+
 (define (problem tireworld-1)
     (:domain tyreworld)
     (:objects
+    	tool wheel nut - obj
+	 	container hub - obj
         wrench jack pump - tool
-        the-hub1
-        - hub
-        nuts1
-        - nut
+        the-hub1 - hub
+        nuts1 - nut
         boot - container
-        r1 w1
-        - wheel
-        )
+        r1 w1 - wheel
+    )
     (:init
         (in jack boot)
         (in pump boot)
@@ -24,17 +25,18 @@
         (tight nuts1 the-hub1)
         (fastened the-hub1)
     )
+    
     (:goal
         (and
-        (on r1 the-hub1)
-        (inflated r1)
-        (tight nuts1 the-hub1)
-        (in w1 boot)
-        (in wrench boot)
-        (in jack boot)
-        (in pump boot)
-        (closed boot)
-    )
+	        (on r1 the-hub1)
+	        (inflated r1)
+	        (tight nuts1 the-hub1)
+	        (in w1 boot)
+	        (in wrench boot)
+	        (in jack boot)
+	        (in pump boot)
+	        (closed boot)
+    	)
     )
 )
 
