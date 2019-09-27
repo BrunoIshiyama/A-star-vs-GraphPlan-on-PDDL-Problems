@@ -1,6 +1,5 @@
 package model;
 
-import fr.uga.pddl4j.util.BitExp;
 import fr.uga.pddl4j.util.BitState;
 
 public class Node extends BitState {
@@ -10,7 +9,8 @@ public class Node extends BitState {
     // h(n)
     private int heuristic;
 
-    public Node(BitExp init) {
+    public Node(BitState state) {
+        super(state);
     }
 
     // f(n) = g(n) + h(n)
