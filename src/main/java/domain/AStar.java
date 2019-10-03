@@ -1,4 +1,4 @@
-package model;
+package domain;
 
 import fr.uga.pddl4j.encoding.CodedProblem;
 import fr.uga.pddl4j.util.BitOp;
@@ -8,22 +8,47 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
 
 /**
  * Class responsible for AStar Search
  */
 public class AStar {
 
+    private static final int DEFAULT_COST = 1;
+
     public AStar() {
     }
 
     public void search(CodedProblem codedProblem) {
-        PriorityQueue openSet = new PriorityQueue(100, new NodeComparator());
-        Set closedSet = new HashSet();
+        final PriorityQueue<Node> openSet = new PriorityQueue<>(100, new NodeComparator());
+        final HashSet<Node> closedSet = new HashSet<>();
 
         BitState initialState = new BitState(codedProblem.getInit());
         Node initial = new Node(initialState);
+        openSet.add(initial);
+        Node solution = null;
+
+        while (!openSet.isEmpty()){
+            Node current = openSet.poll();
+            openSet.remove(current);
+            closedSet.add(current);
+
+            if(current.include(codedProblem.getGoal().getPositive())
+                    && current.exclude(codedProblem.getGoal().getNegative())) {
+                solution = current;
+                break;
+            }
+
+            List<BitOp> applicableOperators = findApplicableOperators(current, codedProblem.getOperators());
+            applicableOperators.forEach(operator -> {
+                Node successor = findSuccessorState(operator, current);
+                // TODO: tratar quando já está no openSet e no closedSet
+                openSet.add(successor);
+            });
+        }
+
+        generatePlan(solution);
+
     }
 
     /**
@@ -59,7 +84,15 @@ public class AStar {
                 successor.apply(condEffect.getEffects());
             }
         });
+        successor.setAction(operator);
+        successor.setParent(current);
+        successor.setCost(current.getCost() + DEFAULT_COST);
+        successor.setHeuristic(1);
         return successor;
+    }
+
+    public void generatePlan(Node solution) {
+        //TODO: gerar plano
     }
 
 }
