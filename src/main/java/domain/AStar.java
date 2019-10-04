@@ -20,17 +20,18 @@ public class AStar {
     }
 
     public void search(CodedProblem codedProblem) {
-        final PriorityQueue<Node> openSet = new PriorityQueue<>(100, new NodeComparator());
+        final PriorityQueue<Node> open = new PriorityQueue<>(100, new NodeComparator());
+        final HashSet<Node> openSet = new HashSet<>();
         final HashSet<Node> closedSet = new HashSet<>();
 
         BitState initialState = new BitState(codedProblem.getInit());
         Node initial = new Node(initialState);
-        openSet.add(initial);
+        open.add(initial);
         Node solution = null;
 
-        while (!openSet.isEmpty()){
-            Node current = openSet.poll();
-            openSet.remove(current);
+        while (!open.isEmpty()){
+            Node current = open.poll();
+            open.remove(current);
             closedSet.add(current);
 
             if(current.include(codedProblem.getGoal().getPositive())
@@ -42,8 +43,17 @@ public class AStar {
             List<BitOp> applicableOperators = findApplicableOperators(current, codedProblem.getOperators());
             applicableOperators.forEach(operator -> {
                 Node successor = findSuccessorState(operator, current);
+                int g = successor.getCost() + DEFAULT_COST;
+                if(!openSet.contains(successor)) {
+                    if(closedSet.contains(successor))
+                } else if(g < successor.getCost()) {
+                    successor.setCost(g);
+                    successor.setParent(current);
+                    successor.setAction(operator);
+                    // TODO: checar se atualiza na lista
+                }
                 // TODO: tratar quando já está no openSet e no closedSet
-                openSet.add(successor);
+                open.add(successor);
             });
         }
 
