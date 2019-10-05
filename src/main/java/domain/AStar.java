@@ -61,10 +61,10 @@ public class AStar {
                     }
                 } else if(successor.getCost() < resultNode.getCost()) {
                     openSet.put(successor.getState(), successor);
-                    // TODO: atualizar lista de prioridade
+                    open.remove(resultNode);
+                    open.add(successor);
                 }
-                // TODO: tratar quando já está no openSet e no closedSet
-                open.add(successor);
+                // TODO: validar se a comparacao deve ser por custo ou por custo+heuristica
             });
         }
 
