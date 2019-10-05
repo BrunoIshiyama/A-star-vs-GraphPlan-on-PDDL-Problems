@@ -3,7 +3,7 @@ package domain;
 import fr.uga.pddl4j.util.BitOp;
 import fr.uga.pddl4j.util.BitState;
 
-public class Node extends BitState {
+public class Node {
 
     // parent state
     private Node parent;
@@ -14,8 +14,9 @@ public class Node extends BitState {
     // h(n)
     private int heuristic;
 
-    public Node(BitState state) {
-        super(state);
+    private BitState state;
+
+    public Node() {
     }
 
     // f(n) = g(n) + h(n)
@@ -28,6 +29,14 @@ public class Node extends BitState {
     public Node getParent() { return parent; }
 
     public BitOp getAction() { return action; }
+
+    public BitState getState() {
+        return state;
+    }
+
+    public void setState(BitState state) {
+        this.state = state;
+    }
 
     public void setCost(int cost) { this.cost = cost; }
 
