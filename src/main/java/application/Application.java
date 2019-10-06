@@ -17,13 +17,13 @@ public class Application {
         try {
 //            System.out.println(PDDLManager.getActionParameters("loosen"));
 //            System.out.println(PDDLManager.getActionPreconditions("loosen").cardinality());
-
+//
 //            HSP hsp = new HSP();
 //            Plan plan = hsp.search(codedProblem);
 //            System.out.println(codedProblem.toString(plan));
 
-            AStar aStar = new AStar();
-            aStar.search(codedProblem);
+            AStar aStar = new AStar(codedProblem);
+            System.out.println(aStar.search());
 
         } catch (Exception e) {
             // TODO Auto-generated catch block

@@ -5,14 +5,15 @@ import fr.uga.pddl4j.util.BitState;
 
 public class Node {
 
+    private static final long serialVersionUID = 1L;
     // parent state
     private Node parent;
     // action taken that resulted in this state
     private BitOp action;
     // g(n)
-    private int cost;
+    private double cost;
     // h(n)
-    private int heuristic;
+    private double heuristic;
 
     private BitState state;
 
@@ -20,11 +21,11 @@ public class Node {
     }
 
     // f(n) = g(n) + h(n)
-    public int getTotalCost() {
+    public double getTotalCost() {
         return cost + heuristic;
     }
 
-    public int getCost() { return cost; }
+    public double getCost() { return cost; }
 
     public Node getParent() { return parent; }
 
@@ -38,12 +39,12 @@ public class Node {
         this.state = state;
     }
 
-    public void setCost(int cost) { this.cost = cost; }
+    public void setCost(double cost) { this.cost = cost; }
 
     public void setParent(Node parent) { this.parent = parent; }
 
     public void setAction(BitOp action) { this.action = action; }
 
-    public void setHeuristic(int heuristic) { this.heuristic = heuristic; }
+    public void setHeuristic(double heuristic) { this.heuristic = heuristic; }
 
 }
