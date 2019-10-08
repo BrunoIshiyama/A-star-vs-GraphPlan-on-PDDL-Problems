@@ -5,6 +5,7 @@ import fr.uga.pddl4j.util.BitOp;
 import fr.uga.pddl4j.util.BitState;
 import fr.uga.pddl4j.util.CondBitExp;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +21,6 @@ public class AStar {
     private final HashMap<BitState, Node> openSet = new HashMap<>();
     private final HashMap<BitState, Node> closedSet = new HashMap<>();
     private final CodedProblem codedProblem;
-    private int branchingFactorAverage = 0;
 
     public AStar(CodedProblem codedProblem) {
         this.codedProblem = codedProblem;
@@ -28,13 +28,14 @@ public class AStar {
 
     public String search() {
         long begin = System.currentTimeMillis();
-        final PriorityQueue<Node> open = new PriorityQueue<>(100, new NodeComparator());
+        final PriorityQueue<Node> open = new PriorityQueue<>(11, new NodeComparator());
 
         BitState initialState = new BitState(codedProblem.getInit());
         Node initial = new Node();
         initial.setState(initialState);
         open.add(initial);
         Node solution = null;
+        double branches = 0;
 
         while (!open.isEmpty()){
             Node current = open.poll();
@@ -56,7 +57,8 @@ public class AStar {
                     if(resultNode == null) {
                         open.add(successor);
                         openSet.put(successor.getState(), successor);
-                    } else {
+                    }
+                    else {
                         if (successor.getCost() < resultNode.getCost()) {
                             open.add(successor);
                             openSet.put(successor.getState(), successor);
@@ -69,20 +71,22 @@ public class AStar {
                     open.add(successor);
                 }
             }
-            if(branchingFactorAverage == 0) {
-                branchingFactorAverage = applicableOperators.size();
-            } else {
-                branchingFactorAverage = (branchingFactorAverage + applicableOperators.size())/2;
-            }
+            branches += applicableOperators.size();
         }
         long algorithmTime = System.currentTimeMillis() - begin;
+
+        if(solution==null) {
+            return "No solution was found!";
+        }
+
         String plan = generatePlan(solution);
         StringBuilder result = new StringBuilder();
+        DecimalFormat df = new DecimalFormat("#.##");
         result.append(plan)
                 .append("\nALGORITHM TIME: ").append(algorithmTime).append(" ms").append("\n")
                 .append("\nTOTAL VISITED NODES: ").append(closedSet.size()).append("\n")
                 .append("\nTOTAL CREATED NODES: ").append(closedSet.size() + openSet.size()).append("\n")
-                .append("\nBRANCHING FACTOR: ").append(branchingFactorAverage).append("\n");
+                .append("\nBRANCHING FACTOR: ").append(df.format(branches/closedSet.size())).append("\n");
 
 
         return result.toString();
@@ -90,13 +94,14 @@ public class AStar {
     }
 
     /**
-     * * Responsible for finding all operators that can be applied to a specific state
+     * *
+     * Responsible for finding all operators that can be applied to a specific state
      *
      * @param node current state
      * @param operators all actions
      * @return list of applicable operators
      */
-    public List<BitOp> findApplicableOperators(Node node, List<BitOp> operators) {
+    private List<BitOp> findApplicableOperators(Node node, List<BitOp> operators) {
         List<BitOp> applicableOperators = new ArrayList<>();
         operators.forEach(operator -> {
             if(node.getState().include(operator.getPreconditions().getPositive())
@@ -114,7 +119,7 @@ public class AStar {
      * @param current - current node (state)
      * @return successor node(state)
      */
-    public Node findSuccessorState (BitOp operator, Node current) {
+    private Node findSuccessorState(BitOp operator, Node current) {
         Node successor = new Node();
         BitState newState = new BitState(current.getState());
         for(CondBitExp condEffect: operator.getCondEffects()) {
@@ -126,18 +131,23 @@ public class AStar {
         successor.setState(newState);
         successor.setAction(operator);
         successor.setParent(current);
-        successor.setCost(current.getCost() + operator.getCost());
+        successor.setCost(current.getCost() + DEFAULT_COST);
         successor.setHeuristic(1);
         return successor;
     }
 
-    public String generatePlan(Node solution) {
+    /**
+     * Responsible for generating the Plan for the search
+     *
+     * @param solution last state visited which is equal to the goal
+     * @return plan
+     */
+    private String generatePlan(Node solution) {
         StringBuilder plan = new StringBuilder();
         int planSize = 0;
         for(Node n = solution; n.getParent()!=null; n = n.getParent()) {
-            plan.insert(0,String.format("%s [%d]%n",
-                    codedProblem.toShortString(n.getAction()),
-                    (int)n.getAction().getDuration()));
+            plan.insert(0,String.format("%s %n",
+                    codedProblem.toShortString(n.getAction())));
             planSize++;
         }
         plan.insert(0,"PLAN: \n");

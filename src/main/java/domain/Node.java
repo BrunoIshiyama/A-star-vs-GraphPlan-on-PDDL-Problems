@@ -4,8 +4,7 @@ import fr.uga.pddl4j.util.BitOp;
 import fr.uga.pddl4j.util.BitState;
 
 public class Node {
-
-    private static final long serialVersionUID = 1L;
+    
     // parent state
     private Node parent;
     // action taken that resulted in this state
