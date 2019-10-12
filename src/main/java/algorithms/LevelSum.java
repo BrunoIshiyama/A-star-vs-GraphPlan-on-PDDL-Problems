@@ -11,16 +11,12 @@ public class LevelSum extends PlanningGraph {
 		super(problem);
 	}
 
-	public int calculate(final BitState state, final BitExp goal) {
-		super.setGoal(goal);
+	public int cost(final BitState state, final BitExp goal) {
 		this.expandPlanningGraph(state);
 		int value = 0;
 		final BitVector posGoal = goal.getPositive();
-		final BitVector negGoal = goal.getNegative();
 		for (int g = posGoal.nextSetBit(0); g >= 0; g = posGoal.nextSetBit(g + 1))
-			value += super.getPosPropLevel(g);
-		for (int g = negGoal.nextSetBit(0); g >= 0; g = negGoal.nextSetBit(g + 1))
-			value += super.getNegPropLevel(g);
+			value += super.getPropositionLevel(g);
 		return value;
 	}
 }
