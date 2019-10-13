@@ -21,12 +21,14 @@ public class AStar {
     private final HashMap<BitState, Node> openSet = new HashMap<>();
     private final HashMap<BitState, Node> closedSet = new HashMap<>();
     private final CodedProblem codedProblem;
+    private final Heuristic heuristic;
 
     public AStar(CodedProblem codedProblem) {
         this.codedProblem = codedProblem;
+        this.heuristic = new Heuristic(codedProblem);
     }
 
-    public String search() {
+    public String search(Heuristic.Type heuristicType) {
         long begin = System.currentTimeMillis();
         final PriorityQueue<Node> open = new PriorityQueue<>(11, new NodeComparator());
 
@@ -50,7 +52,7 @@ public class AStar {
 
             List<BitOp> applicableOperators = findApplicableOperators(current, codedProblem.getOperators());
             for(BitOp operator: applicableOperators){
-                Node successor = findSuccessorState(operator, current);
+                Node successor = findSuccessorState(operator, current, heuristicType);
                 Node resultNode = openSet.get(successor.getState());
                 if( resultNode == null) {
                     resultNode = closedSet.get(successor.getState());
@@ -119,7 +121,7 @@ public class AStar {
      * @param current - current node (state)
      * @return successor node(state)
      */
-    private Node findSuccessorState(BitOp operator, Node current) {
+    private Node findSuccessorState(BitOp operator, Node current, Heuristic.Type heuristicType) {
         Node successor = new Node();
         BitState newState = new BitState(current.getState());
         for(CondBitExp condEffect: operator.getCondEffects()) {
@@ -132,7 +134,7 @@ public class AStar {
         successor.setAction(operator);
         successor.setParent(current);
         successor.setCost(current.getCost() + DEFAULT_COST);
-        successor.setHeuristic(1);
+        successor.setHeuristic(heuristic.calculate(heuristicType, newState));
         return successor;
     }
 

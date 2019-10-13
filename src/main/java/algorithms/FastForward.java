@@ -5,9 +5,9 @@ import fr.uga.pddl4j.util.BitExp;
 import fr.uga.pddl4j.util.BitState;
 import fr.uga.pddl4j.util.BitVector;
 
-public class FastFoward extends PlanningGraph {
+public class FastForward extends PlanningGraph {
 
-	public FastFoward(CodedProblem problem) {
+	public FastForward(CodedProblem problem) {
 		super(problem);
 	}
 	
@@ -36,7 +36,6 @@ public class FastFoward extends PlanningGraph {
                     for (int p = posPreconditions.nextSetBit(0); p >= 0; p = posPreconditions.nextSetBit(p + 1)) {
                         final int pLevel = super.getPropositionLevel(p);
                         if (pLevel != 0 && !pGk1.get(p)) {
-                        	System.out.println(pLevel);
                             goals[pLevel].getPositive().set(p);
                         }
                     }
