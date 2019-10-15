@@ -6,7 +6,7 @@ ANA PAULA BRUNO CARBONE - 9761805
 BRUNO YUJI ISHIYAMA - 9779051
 FERNANDO D’AVILA AXTHELM - 9778881
 
-#Como executar o programa
+# Como executar o programa
 
 Primeiramente importe o projeto em uma IDE como um "Existing Maven Projects", recomendamos o Eclipse.
 Após as dependências serem carregadas na aplicação a utilização e configuração se torna simples.
