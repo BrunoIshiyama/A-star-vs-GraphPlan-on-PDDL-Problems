@@ -20,7 +20,8 @@ public abstract class PlanningGraph {
 	private int[] precondCardinality;
 	private int[] operatorsLevel;
 	private int[] precondCounters;
-	private int[] propositionLevel;
+	private int[] posPropositionLevel;
+	private int[] negPropositionLevel;
 	private BitExp[] precondEdges;
 	private BitExp[] effectsEdges;
 	private BitExp[] preconditions;
@@ -47,7 +48,8 @@ public abstract class PlanningGraph {
 		for (BitOp op : operators) {
 			nUnconditionalOperators += op.getCondEffects().size();
 		}
-		this.propositionLevel = new int[nFacts];
+		this.posPropositionLevel = new int[nFacts];
+		this.negPropositionLevel = new int[nFacts];
 		this.operatorsLevel = new int[nUnconditionalOperators];
 		this.precondCounters = new int[nUnconditionalOperators];
 		this.preconditions = new BitExp[nUnconditionalOperators];
@@ -118,30 +120,43 @@ public abstract class PlanningGraph {
 	 * This method expands the planning graph until it hits its goal
 	 *
 	 * @param state the initial state of the relaxed planning graph.
-	 * @return 
+	 * @return
 	 * @return the level of the graph built.
 	 */
 	protected final void expandPlanningGraph(final BitState state) {
 
 		Arrays.fill(this.operatorsLevel, Integer.MAX_VALUE);
-		Arrays.fill(this.propositionLevel, Integer.MAX_VALUE);
+		Arrays.fill(this.posPropositionLevel, 0);
+		Arrays.fill(this.negPropositionLevel, Integer.MAX_VALUE);
 		Arrays.fill(this.precondCounters, 0);
 
 		final BitVector posGoals = goal.getPositive();
+		final BitVector negGoals = goal.getNegative();
 		this.goalCounter = 0;
 
 		this.level = 0;
 		BitVector posPropositions = new BitVector(state);
+		BitVector negPropositions = new BitVector();
+		negPropositions.flip(0, facts.size());
+		negPropositions.andNot(state);
 		for (int p = posPropositions.nextSetBit(0); p >= 0; p = posPropositions.nextSetBit(p + 1)) {
-			this.propositionLevel[p] = 0;
+			this.posPropositionLevel[p] = 0;
 			if (posGoals.get(p)) {
+				this.goalCounter++;
+			}
+		}
+		for (int p = negPropositions.nextSetBit(0); p >= 0; p = negPropositions.nextSetBit(p + 1)) {
+
+			this.negPropositionLevel[p] = 0;
+			if (negGoals.get(p)) {
 				this.goalCounter++;
 			}
 		}
 
 		final BitVector propositionsReached = new BitVector();
+		final BitVector negAcc = new BitVector();
 
-		while (this.goalCounter != this.goalPropositionCost && !posPropositions.isEmpty()) {
+		while (this.goalCounter != goalPropositionCost && (!posPropositions.isEmpty() || !negPropositions.isEmpty())) {
 			final BitVector newOperations = new BitVector();
 			for (int p = posPropositions.nextSetBit(0); p >= 0; p = posPropositions.nextSetBit(p + 1)) {
 				final BitVector posEdges = this.precondEdges[p].getPositive();
@@ -155,45 +170,72 @@ public abstract class PlanningGraph {
 					}
 				}
 			}
+			for (int p = negPropositions.nextSetBit(0); p >= 0; p = negPropositions.nextSetBit(p + 1)) {
+				final BitVector negEdges = this.precondEdges[p].getNegative();
+				negAcc.set(p);
+				for (int pe = negEdges.nextSetBit(0); pe >= 0; pe = negEdges.nextSetBit(pe + 1)) {
+					if (this.precondCardinality[pe] != 0) {
+						this.precondCounters[pe]++;
+					}
+					if (this.precondCounters[pe] == this.precondCardinality[pe]) {
+						newOperations.set(pe);
+					}
+				}
+			}
 			final BitVector newPropositions = new BitVector();
+			final BitVector negNewPropositions = new BitVector();
 			for (int o = newOperations.nextSetBit(0); o >= 0; o = newOperations.nextSetBit(o + 1)) {
 				this.operatorsLevel[o] = this.level;
 				newPropositions.or(this.effects[o].getPositive());
+				negNewPropositions.or(this.effects[o].getNegative());
+
 			}
 
 			posPropositions = newPropositions;
+			negPropositions = negNewPropositions;
 			posPropositions.andNot(propositionsReached);
+			negPropositions.andNot(negAcc);
 
 			this.level++;
 			for (int p = posPropositions.nextSetBit(0); p >= 0; p = posPropositions.nextSetBit(p + 1)) {
-				this.propositionLevel[p] = this.level;
+				this.posPropositionLevel[p] = this.level;
 				if (posGoals.get(p)) {
+					this.goalCounter++;
+				}
+			}
+			for (int p = negPropositions.nextSetBit(0); p >= 0; p = negPropositions.nextSetBit(p + 1)) {
+				this.negPropositionLevel[p] = this.level;
+				if (negGoals.get(p)) {
 					this.goalCounter++;
 				}
 			}
 		}
 	}
 
-	protected int getPropositionLevel(int n) {
-		return propositionLevel[n];
+	protected int getPosPropositionLevel(int n) {
+		return posPropositionLevel[n];
 	}
-	
+
+	protected int getNegPropositionLevel(int n) {
+		return negPropositionLevel[n];
+	}
+
 	protected int getLevel() {
 		return this.level;
 	}
-	
+
 	protected BitExp getEffectsEdges(int n) {
 		return effectsEdges[n];
 	}
-	
+
 	protected BitExp getPreconditions(int n) {
 		return preconditions[n];
 	}
-	
+
 	protected BitExp getEffects(int n) {
 		return effects[n];
 	}
-	
+
 	protected List<BitOp> getOperators() {
 		return operators;
 	}
